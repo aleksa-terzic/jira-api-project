@@ -1,4 +1,3 @@
-import aiohttp
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +12,5 @@ class JiraConfig(BaseSettings):
 
 def get_api_headers():
     return {
-        "Accept": "application/json",
         "Content-Type": "application/json",
     }

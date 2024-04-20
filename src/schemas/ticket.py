@@ -19,7 +19,7 @@ class Description(BaseModel):
     content: List[Paragraph]
 
 
-class TicketCreate(BaseModel):
+class TicketData(BaseModel):
     summary: str
     description: str
 
@@ -41,3 +41,7 @@ class TicketCreate(BaseModel):
 
         description_json = {"type": "doc", "version": 1, "content": content}
         return Description(**description_json).dict()
+
+
+class TicketsCreate(BaseModel):
+    tickets: List[TicketData]
