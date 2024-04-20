@@ -11,9 +11,8 @@ class JiraConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
 
-def get_api_headers_func(config: JiraConfig) -> callable:
-    def headers_func(request):
-        request.headers["Accept"] = "application/json"
-        request.headers["Content-Type"] = "application/json"
-        return request
-    return headers_func
+def get_api_headers():
+    return {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
