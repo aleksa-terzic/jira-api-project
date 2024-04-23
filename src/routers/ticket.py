@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+from src.configuration import JiraConfig
 from src.jira_service import JiraService
 from src.schemas.ticket import TicketsCreate, IssueType, ProjectDetails, Project
 
@@ -23,7 +24,7 @@ async def get_issue_types():
         (
             project
             for project in jira_response["projects"]
-            if project["id"] == "10000"  # use config.JIRA_PROJECT_ID
+            if project["id"] == JiraConfig.JIRA_PROJECT_ID
         ),
         None,
     )
