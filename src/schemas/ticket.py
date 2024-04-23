@@ -22,6 +22,7 @@ class Description(BaseModel):
 class TicketData(BaseModel):
     summary: str
     description: str
+    issue_type: str
 
     @field_validator("description")
     def validate_description(cls, value):
@@ -45,3 +46,20 @@ class TicketData(BaseModel):
 
 class TicketsCreate(BaseModel):
     tickets: List[TicketData]
+
+
+class Project(BaseModel):
+    id: str
+    key: str
+    name: str
+
+
+class IssueType(BaseModel):
+    id: str
+    description: str
+    name: str
+
+
+class ProjectDetails(BaseModel):
+    project: Project
+    issue_types: List[IssueType]
