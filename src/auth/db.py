@@ -12,9 +12,19 @@ users = {
 }
 
 
-def check_api_key(api_key: str):
+def check_api_key(api_key: str) -> bool:
+    """
+    Check if the API key is valid.
+    :param api_key: str
+    :return: boolean
+    """
     return api_key in api_keys
 
 
-def get_user_from_api_key(api_key: str):
+def get_user_from_api_key(api_key: str) -> dict:
+    """
+    Get the user from the API key.
+    :param api_key: str
+    :return: dict with user data
+    """
     return users[api_keys[api_key]]

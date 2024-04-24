@@ -13,6 +13,10 @@ jira_config = JiraConfig()
 # create pydantic model for response?? response_model=TicketsCreateResponse
 @router.post("/generate")
 async def create_tickets(ticket_data: TicketData, _=Depends(get_user)):
+    """
+    Creates a ticket in Jira project.
+    Can create multiple tickets at once.
+    """
     # tickets = ticket_data.tickets
     responses = await jira_service.create_ticket(ticket_data)
     return responses
@@ -20,6 +24,10 @@ async def create_tickets(ticket_data: TicketData, _=Depends(get_user)):
 
 @router.get("/issue-types")
 async def get_issue_types(_=Depends(get_user)):
+    """
+    Gets all issue types available for the selected project.
+    You set up the project ID in the .env file.
+    """
     jira_response = await jira_service.get_issue_types()
 
     selected_project = next(
