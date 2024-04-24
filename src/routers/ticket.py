@@ -1,30 +1,32 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from src.auth.auth import get_user
 from src.configuration import JiraConfig
 from src.jira_service import JiraService
-from src.schemas.ticket import TicketsCreate, IssueType, ProjectDetails, Project
+from src.schemas.ticket import IssueType, ProjectDetails, Project, TicketData
 
 router = APIRouter()
 jira_service = JiraService()
+jira_config = JiraConfig()
 
 
 # create pydantic model for response?? response_model=TicketsCreateResponse
 @router.post("/generate")
-async def create_tickets(ticket_data: TicketsCreate):
-    tickets = ticket_data.tickets
-    responses = await jira_service.create_tickets(tickets)
+async def create_tickets(ticket_data: TicketData, _=Depends(get_user)):
+    # tickets = ticket_data.tickets
+    responses = await jira_service.create_ticket(ticket_data)
     return responses
 
 
-@router.get("/issuetypes")
-async def get_issue_types():
+@router.get("/issue-types")
+async def get_issue_types(_=Depends(get_user)):
     jira_response = await jira_service.get_issue_types()
 
     selected_project = next(
         (
             project
             for project in jira_response["projects"]
-            if project["id"] == JiraConfig.JIRA_PROJECT_ID
+            if project["id"] == jira_config.JIRA_PROJECT_ID
         ),
         None,
     )

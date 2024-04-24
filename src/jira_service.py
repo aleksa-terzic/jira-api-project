@@ -1,13 +1,18 @@
-import asyncio
 import json
 
 import aiohttp
 from src import configuration
+from src.schemas.ticket import TicketData
 
+# Initialize configuration
 config = configuration.JiraConfig()
 
 
 class JiraService:
+    """
+    JiraService class with methods to interact with Jira API.
+    """
+
     def __init__(self):
         self.base_url = config.JIRA_BASE_URL
         self.username = config.JIRA_USERNAME
@@ -51,11 +56,10 @@ class JiraService:
                 error_detail = _handle_jira_error(error_message)
                 return {"error": f"Failed to perform POST request: {error_detail}"}
 
-    async def _create_ticket(self, ticket, session):
+    async def create_ticket(self, ticket: TicketData):
         """
         Private method to create a Jira ticket, called from create_tickets
         :param ticket:
-        :param session:
         :return:
         """
         path = "/rest/api/3/issue"
@@ -68,28 +72,29 @@ class JiraService:
                 issuetype=dict(id=ticket.issue_type),
             )
         )
-        return await self._post(endpoint, data, session)
-
-    async def create_tickets(self, tickets):
-        """
-        Create Jira tickets
-        :param tickets: list of TicketsCreate
-        :return: list of responses
-        """
         async with aiohttp.ClientSession() as session:
-            tasks = [self._create_ticket(ticket, session) for ticket in tickets]
-            responses = await asyncio.gather(*tasks)
-            return responses
+            return await self._post(endpoint, data, session)
 
     async def get_issue_types(self):
         """
         Get issue types for a project
         :return: dict
         """
-        path = "/rest/api/3/issue/createmeta"
+        path = "/rest/api/3/issue/createmeta"  # deprecated
         endpoint = f"{self.base_url}{path}"
         async with aiohttp.ClientSession() as session:
             return await self._get(endpoint, session)
+
+    # async def create_tickets(self, tickets):
+    #     """
+    #     Create Jira tickets
+    #     :param tickets: list of TicketsCreate
+    #     :return: list of responses
+    #     """
+    #     async with aiohttp.ClientSession() as session:
+    #         tasks = [self._create_ticket(ticket, session) for ticket in tickets]
+    #         responses = await asyncio.gather(*tasks)
+    #         return responses
 
 
 def _handle_jira_error(error_message):

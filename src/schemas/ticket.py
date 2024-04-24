@@ -44,8 +44,8 @@ class TicketData(BaseModel):
         return Description(**description_json).dict()
 
 
-class TicketsCreate(BaseModel):
-    tickets: List[TicketData]
+# class TicketsCreate(BaseModel):
+#     tickets: List[TicketData]
 
 
 class Project(BaseModel):
