@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from src.authentication import auth
 from src import configuration
 from src import jira_service as service
+from src.authentication import auth
 from src.schemas import ticket
 
 router = APIRouter()

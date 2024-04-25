@@ -1,7 +1,6 @@
 """ Authentication logic for our API. Implements basic API key authentication. """
 
-from fastapi import HTTPException, Security, status
-from fastapi import security
+from fastapi import HTTPException, Security, security, status
 
 from src.authentication import db
 
