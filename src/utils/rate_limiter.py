@@ -35,7 +35,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     """
 
     def __init__(self, app: Callable, window: int = 60, limit: int = 60):
-        # Hardcoded rate limit of 60 requests per minute per IP address.
+        # Default rate limit of 60 requests per minute per IP address.
         super().__init__(app)
         self.window = window
         self.limit = limit

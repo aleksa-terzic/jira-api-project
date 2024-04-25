@@ -20,9 +20,7 @@ def get_application():
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.add_middleware(
-        rate_limiter.RateLimitMiddleware, window=60, limit=5  # noqa
-    )
+    application.add_middleware(rate_limiter.RateLimitMiddleware) # noqa
 
     application.include_router(ticket.router)
     application.include_router(webhook.router)
