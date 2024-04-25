@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+""" This module contains the FastAPI router for ticket-related endpoints. """
+
+from fastapi import APIRouter, Depends, HTTPException
 
 from src.auth.auth import get_user
 from src.configuration import JiraConfig
 from src.jira_service import JiraService
-from src.schemas.ticket import IssueType, ProjectDetails, Project, TicketData
+from src.schemas.ticket import IssueType, Project, ProjectDetails, TicketData
 
 router = APIRouter()
 jira_service = JiraService()
@@ -62,5 +64,4 @@ async def get_issue_types(_=Depends(get_user)):
             project=formatted_project, issue_types=issue_types
         )
         return response_data
-    else:
-        raise HTTPException(status_code=404, detail="Project not found")
+    raise HTTPException(status_code=404, detail="Project not found")

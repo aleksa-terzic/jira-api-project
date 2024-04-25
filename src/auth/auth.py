@@ -1,4 +1,6 @@
-from fastapi import Security, HTTPException, status
+""" Authentication logic for our API. Implements basic API key authentication. """
+
+from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 
 from src.auth.db import check_api_key, get_user_from_api_key

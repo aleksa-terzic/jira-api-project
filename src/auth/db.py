@@ -1,3 +1,5 @@
+""" Database imitation module for authentication. """
+
 # 32bit api key length for demonstration purposes
 api_keys = {
     "4BwWbVFpCaikFZe8G8rr7I21nhCw8N0t": "aleksa_rivian",

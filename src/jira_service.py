@@ -1,6 +1,10 @@
+""" JiraService class that implements methods used to interact with Jira API."""
+
 import json
 
 import aiohttp
+from fastapi import status
+
 from src import configuration
 from src.schemas.ticket import TicketData
 
@@ -13,6 +17,9 @@ class JiraService:
     JiraService class with methods to interact with Jira API.
     """
 
+    JIRA_ISSUE_CREATE_ENDPOINT = "/rest/api/3/issue"
+    JIRA_ISSUE_CREATEMETA_ENDPOINT = "/rest/api/3/issue/createmeta"
+
     def __init__(self):
         self.base_url = config.JIRA_BASE_URL
         self.username = config.JIRA_USERNAME
@@ -21,67 +28,55 @@ class JiraService:
         self.auth = aiohttp.BasicAuth(self.username, self.api_token)
         self.headers = configuration.get_api_headers()
 
-    async def _get(self, endpoint, session):
+    async def _get(self, endpoint, session) -> dict:
         """
         Perform a GET request to Jira API
-        :param endpoint:
-        :param session:
-        :return:
+        :param endpoint: str
+        :param session: aiohttp.ClientSession
+        :return: dict
         """
         async with session.get(
             endpoint, auth=self.auth, headers=self.headers
         ) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                error_message = await response.text()
-                error_detail = _handle_jira_error(error_message)
-                return {"error": f"Failed to perform GET request: {error_detail}"}
+            return await _handle_response(response)
 
-    async def _post(self, endpoint, data, session):
+    async def _post(self, endpoint, data, session) -> dict:
         """
         Perform a POST request to Jira API
-        :param endpoint:
-        :param data:
-        :param session:
-        :return:
+        :param endpoint: str
+        :param data: dict
+        :param session: aiohttp.ClientSession
+        :return: dict
         """
         async with session.post(
             endpoint, json=data, auth=self.auth, headers=self.headers
         ) as response:
-            if response.status == 201:
-                return await response.json()
-            else:
-                error_message = await response.text()
-                error_detail = _handle_jira_error(error_message)
-                return {"error": f"Failed to perform POST request: {error_detail}"}
+            return await _handle_response(response)
 
-    async def create_ticket(self, ticket: TicketData):
+    async def create_ticket(self, ticket: TicketData) -> dict:
         """
         Private method to create a Jira ticket, called from create_tickets
-        :param ticket:
-        :return:
+        :param ticket: TicketData
+        :return: dict
         """
-        path = "/rest/api/3/issue"
-        endpoint = f"{self.base_url}{path}"  # use pydantic model for this
-        data = dict(
-            fields=dict(
-                project=dict(id=self.project_id),
-                summary=ticket.summary,
-                description=ticket.description,
-                issuetype=dict(id=ticket.issue_type),
-            )
-        )
+        endpoint = f"{self.base_url}{self.JIRA_ISSUE_CREATE_ENDPOINT}"
+        data = {
+            "fields": {
+                "project": {"id": self.project_id},
+                "summary": ticket.summary,
+                "description": ticket.description,
+                "issuetype": {"id": ticket.issue_type},
+            }
+        }
         async with aiohttp.ClientSession() as session:
             return await self._post(endpoint, data, session)
 
-    async def get_issue_types(self):
+    async def get_issue_types(self) -> dict:
         """
         Get issue types for a project
         :return: dict
         """
-        path = "/rest/api/3/issue/createmeta"  # deprecated
-        endpoint = f"{self.base_url}{path}"
+        endpoint = f"{self.base_url}{self.JIRA_ISSUE_CREATEMETA_ENDPOINT}"
         async with aiohttp.ClientSession() as session:
             return await self._get(endpoint, session)
 
@@ -97,11 +92,24 @@ class JiraService:
     #         return responses
 
 
-def _handle_jira_error(error_message):
+async def _handle_response(response) -> dict:
+    """
+    Handle response from Jira API
+    :param response: dict
+    :return: dict
+    """
+    if response.status in {status.HTTP_200_OK, status.HTTP_201_CREATED}:
+        return await response.json()
+    error_message = await response.text()
+    error_detail = _handle_jira_error(error_message)
+    return {"error": f"Request failed: {error_detail}"}
+
+
+def _handle_jira_error(error_message) -> str:
     """
     Handle Jira error message
-    :param error_message:
-    :return:
+    :param error_message: str
+    :return: str
     """
     try:
         error_data = json.loads(error_message)
