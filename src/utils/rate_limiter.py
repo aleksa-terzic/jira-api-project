@@ -7,16 +7,16 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class RateLimiter:
-    """ Rate limiter class that uses Redis to store the current amount of requests. """
+    """Rate limiter class that uses Redis to store the current amount of requests."""
 
     def __init__(self):
         self.redis = None
 
     async def init_redis(self):
-        """ Initialize the Redis connection. """
+        """Initialize the Redis connection."""
         self.redis = await redis.asyncio.from_url("redis://my-redis")
 
-    async def get_rate_limit_key(self, request: Request) -> str: # noqa
+    async def get_rate_limit_key(self, request: Request) -> str:  # noqa
         """
         Generate a key for rate limiting based on the user's IP address.
 
