@@ -11,3 +11,18 @@ services:
       - ./src:/app/src
     env_file:
       - .env
+    networks:
+        - my-network
+    depends_on:
+      - my-redis
+
+  my-redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - my-network
+
+networks:
+    my-network:
+        driver: bridge

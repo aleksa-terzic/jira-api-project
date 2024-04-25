@@ -16,8 +16,8 @@ import json
 import aiohttp
 from fastapi import status
 
-from src import configuration
 from src.schemas import ticket
+from src.utils import configuration
 
 # Initialize configuration
 config = configuration.JiraConfig()

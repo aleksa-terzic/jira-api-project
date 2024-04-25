@@ -1,4 +1,9 @@
-""" Configuration module for the Jira API. """
+"""
+Configuration module for the Jira API.
+
+Contains the configuration class for the Jira API and a function to get the
+API headers.
+"""
 
 import pydantic_settings
 
