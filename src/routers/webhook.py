@@ -13,12 +13,13 @@ router = fastapi.APIRouter()
 
 
 @router.post("/webhook")
-async def receive_webhook(payload: dict):
+async def receive_webhook(request: fastapi.Request):
     """
     Endpoint to receive webhook notifications - for demonstration purposes only.
     It will print the payload to the standard output.
     """
-    if not payload:
-        return
+    data = await request.json()
     sys.stdout.write("Received webhook payload:")
-    sys.stdout.write(str(payload))
+    # Even though sys.stdout.write is synchronous, reading the request payload
+    # is asynchronous, so it can handle multiple concurrent requests without blocking.
+    sys.stdout.write(str(data))

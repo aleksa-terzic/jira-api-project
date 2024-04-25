@@ -3,7 +3,7 @@
 import fastapi
 from starlette.middleware import cors
 
-from src.routers import ticket
+from src.routers import ticket, webhook
 
 
 def get_application():
@@ -21,6 +21,7 @@ def get_application():
     )
 
     application.include_router(ticket.router)
+    application.include_router(webhook.router)
 
     return application
 
