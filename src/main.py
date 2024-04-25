@@ -4,6 +4,7 @@ import fastapi
 from starlette.middleware import cors
 
 from src.routers import ticket, webhook
+from src.utils import rate_limiter
 
 
 def get_application():
@@ -18,6 +19,9 @@ def get_application():
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+    )
+    application.add_middleware(
+        rate_limiter.RateLimitMiddleware, window=60, limit=5  # noqa
     )
 
     application.include_router(ticket.router)

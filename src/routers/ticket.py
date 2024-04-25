@@ -6,12 +6,12 @@ It contains two endpoints:
 - GET /issue-types: Gets all issue types available for the selected project.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from src import configuration
 from src import jira_service as service
 from src.authentication import auth
 from src.schemas import ticket
+from src.utils import configuration
 
 router = APIRouter()
 jira_service = service.JiraService()
@@ -23,7 +23,11 @@ jira_config = configuration.JiraConfig()
     response_model=ticket.TicketsCreateResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_tickets(ticket_data: ticket.TicketData, user=Depends(auth.get_user)):
+async def create_tickets(
+    _request: Request,
+    ticket_data: ticket.TicketData,
+    user: dict = Depends(auth.get_user),
+):
     """
     Creates a ticket in Jira project.
     Can create multiple tickets at once.
@@ -36,7 +40,7 @@ async def create_tickets(ticket_data: ticket.TicketData, user=Depends(auth.get_u
 @router.get(
     "/issue-types", response_model=ticket.ProjectDetails, status_code=status.HTTP_200_OK
 )
-async def get_issue_types(_=Depends(auth.get_user)):
+async def get_issue_types(_request: Request, _user=Depends(auth.get_user)):
     """
     Gets all issue types available for the selected project.
     You set up the project ID in the .env file.
