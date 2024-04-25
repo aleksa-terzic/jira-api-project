@@ -1,11 +1,17 @@
 """ This module contains the FastAPI router for ticket-related endpoints. """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.auth.auth import get_user
 from src.configuration import JiraConfig
 from src.jira_service import JiraService
-from src.schemas.ticket import IssueType, Project, ProjectDetails, TicketData
+from src.schemas.ticket import (
+    IssueType,
+    Project,
+    ProjectDetails,
+    TicketData,
+    TicketsCreateResponse,
+)
 
 router = APIRouter()
 jira_service = JiraService()
@@ -13,7 +19,11 @@ jira_config = JiraConfig()
 
 
 # create pydantic model for response?? response_model=TicketsCreateResponse
-@router.post("/generate")
+@router.post(
+    "/generate",
+    response_model=TicketsCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_tickets(ticket_data: TicketData, _=Depends(get_user)):
     """
     Creates a ticket in Jira project.
@@ -24,7 +34,9 @@ async def create_tickets(ticket_data: TicketData, _=Depends(get_user)):
     return responses
 
 
-@router.get("/issue-types")
+@router.get(
+    "/issue-types", response_model=ProjectDetails, status_code=status.HTTP_200_OK
+)
 async def get_issue_types(_=Depends(get_user)):
     """
     Gets all issue types available for the selected project.

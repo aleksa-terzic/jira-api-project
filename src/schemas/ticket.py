@@ -59,6 +59,14 @@ class TicketData(BaseModel):
         return Description(**description_json).dict()
 
 
+class TicketsCreateResponse(BaseModel):
+    """Response for ticket creation."""
+
+    id: str
+    key: str
+    self: str
+
+
 # class TicketsCreate(BaseModel):
 #     tickets: List[TicketData]
 
