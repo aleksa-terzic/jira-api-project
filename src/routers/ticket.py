@@ -12,7 +12,6 @@ jira_service = service.JiraService()
 jira_config = configuration.JiraConfig()
 
 
-# create pydantic model for response?? response_model=TicketsCreateResponse
 @router.post(
     "/generate",
     response_model=ticket.TicketsCreateResponse,
