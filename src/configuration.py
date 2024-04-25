@@ -1,9 +1,9 @@
 """ Configuration module for the Jira API. """
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+import pydantic_settings
 
 
-class JiraConfig(BaseSettings):
+class JiraConfig(pydantic_settings.BaseSettings):
     """
     Configuration class for the Jira API. Carries the necessary settings for
     interacting with the Jira API.
@@ -14,7 +14,7 @@ class JiraConfig(BaseSettings):
     JIRA_API_TOKEN: str
     JIRA_PROJECT_ID: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = pydantic_settings.SettingsConfigDict(env_file=".env")
 
 
 def get_api_headers():

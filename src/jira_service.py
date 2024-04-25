@@ -6,7 +6,7 @@ import aiohttp
 from fastapi import status
 
 from src import configuration
-from src.schemas.ticket import TicketData
+from src.schemas import ticket
 
 # Initialize configuration
 config = configuration.JiraConfig()
@@ -53,19 +53,19 @@ class JiraService:
         ) as response:
             return await _handle_response(response)
 
-    async def create_ticket(self, ticket: TicketData) -> dict:
+    async def create_ticket(self, jira_ticket: ticket.TicketData) -> dict:
         """
         Private method to create a Jira ticket, called from create_tickets
-        :param ticket: TicketData
+        :param jira_ticket: TicketData
         :return: dict
         """
         endpoint = f"{self.base_url}{self.JIRA_ISSUE_CREATE_ENDPOINT}"
         data = {
             "fields": {
                 "project": {"id": self.project_id},
-                "summary": ticket.summary,
-                "description": ticket.description,
-                "issuetype": {"id": ticket.issue_type},
+                "summary": jira_ticket.summary,
+                "description": jira_ticket.description,
+                "issuetype": {"id": jira_ticket.issue_type},
             }
         }
         async with aiohttp.ClientSession() as session:

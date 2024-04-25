@@ -1,15 +1,15 @@
 """ Pydantic models for Jira error response. """
 
-from typing import Any, Dict, List
+import typing
 
-from pydantic import BaseModel
+import pydantic
 
 
-class JiraError(BaseModel):
+class JiraError(pydantic.BaseModel):
     """
     Pydantic model for Jira error response.
     """
 
-    errorMessages: List[str]
-    errors: Dict[str, Any]
+    errorMessages: typing.List[str]
+    errors: typing.Dict[str, typing.Any]
     status: int

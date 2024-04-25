@@ -1,40 +1,40 @@
 """ Pydantic models for ticket data. """
 
-from typing import List
+import typing
 
-from pydantic import BaseModel, field_validator
+import pydantic
 
 
-class ContentItem(BaseModel):
+class ContentItem(pydantic.BaseModel):
     """Part of a paragraph."""
 
     type: str
     text: str
 
 
-class Paragraph(BaseModel):
+class Paragraph(pydantic.BaseModel):
     """A paragraph in description."""
 
     type: str
-    content: List[ContentItem]
+    content: typing.List[ContentItem]
 
 
-class Description(BaseModel):
+class Description(pydantic.BaseModel):
     """Description of a ticket."""
 
     type: str
     version: int
-    content: List[Paragraph]
+    content: typing.List[Paragraph]
 
 
-class TicketData(BaseModel):
+class TicketData(pydantic.BaseModel):
     """Data for creating a ticket."""
 
     summary: str
     description: str
     issue_type: str
 
-    @field_validator("description")
+    @pydantic.field_validator("description")
     def validate_description(cls, value):  # pylint: disable=no-self-argument
         """Validates and calls to convert description to Jira JSON format."""
         if isinstance(value, str):
@@ -59,7 +59,7 @@ class TicketData(BaseModel):
         return Description(**description_json).dict()
 
 
-class TicketsCreateResponse(BaseModel):
+class TicketsCreateResponse(pydantic.BaseModel):
     """Response for ticket creation."""
 
     id: str
@@ -71,7 +71,7 @@ class TicketsCreateResponse(BaseModel):
 #     tickets: List[TicketData]
 
 
-class Project(BaseModel):
+class Project(pydantic.BaseModel):
     """Jira project."""
 
     id: str
@@ -79,7 +79,7 @@ class Project(BaseModel):
     name: str
 
 
-class IssueType(BaseModel):
+class IssueType(pydantic.BaseModel):
     """Jira issue type details."""
 
     id: str
@@ -87,8 +87,8 @@ class IssueType(BaseModel):
     name: str
 
 
-class ProjectDetails(BaseModel):
+class ProjectDetails(pydantic.BaseModel):
     """Details of a Jira project along with issue types available."""
 
     project: Project
-    issue_types: List[IssueType]
+    issue_types: typing.List[IssueType]

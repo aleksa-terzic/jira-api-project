@@ -1,14 +1,14 @@
 """Main module for the FastAPI application."""
 
-from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
+import fastapi
+from starlette.middleware import cors
 
 from src.routers import ticket
 
-app = FastAPI()
+app = fastapi.FastAPI()
 
 app.add_middleware(
-    CORSMiddleware,
+    cors.CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
