@@ -1,4 +1,10 @@
-""" This module contains the FastAPI router for ticket-related endpoints. """
+"""
+FastAPI router for ticket-related endpoints.
+
+It contains two endpoints:
+- POST /generate: Creates a ticket in Jira project.
+- GET /issue-types: Gets all issue types available for the selected project.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -17,13 +23,13 @@ jira_config = configuration.JiraConfig()
     response_model=ticket.TicketsCreateResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_tickets(ticket_data: ticket.TicketData, _=Depends(auth.get_user)):
+async def create_tickets(ticket_data: ticket.TicketData, user=Depends(auth.get_user)):
     """
     Creates a ticket in Jira project.
     Can create multiple tickets at once.
     """
     # tickets = ticket_data.tickets
-    responses = await jira_service.create_ticket(ticket_data)
+    responses = await jira_service.create_ticket(ticket_data, user["webhook_url"])
     return responses
 
 

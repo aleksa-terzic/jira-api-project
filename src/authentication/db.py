@@ -8,9 +8,9 @@ api_keys = {
 }
 
 users = {
-    "aleksa_rivian": {"name": "Aleksa"},
-    "sara_rivian": {"name": "Sara"},
-    "natasa_rivian": {"name": "Natasa"},
+    "aleksa_rivian": {"name": "Aleksa", "webhook_url": "http://localhost:8000/webhook"},
+    "sara_rivian": {"name": "Sara", "webhook_url": "http://localhost:8000/webhook"},
+    "natasa_rivian": {"name": "Natasa", "webhook_url": "http://localhost:8000/webhook"},
 }
 
 

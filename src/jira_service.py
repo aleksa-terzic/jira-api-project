@@ -1,4 +1,15 @@
-""" JiraService class that implements methods used to interact with Jira API."""
+"""
+JiraService class that implements methods used to interact with Jira API.
+
+Currently, it includes methods to create a ticker and get create metadata for tickets.
+The class uses aiohttp to perform asynchronous HTTP requests to the Jira API.
+It is initialized with the necessary configuration params.
+
+Example usage:
+    jira_service = JiraService()
+    response = await jira_service.create_ticket(jira_ticket, webhook_url)
+    issue_types = await jira_service.get_issue_types()
+"""
 
 import json
 
@@ -30,7 +41,8 @@ class JiraService:
 
     async def _get(self, endpoint, session) -> dict:
         """
-        Perform a GET request to Jira API
+        Perform a GET request to Jira API.
+
         :param endpoint: str
         :param session: aiohttp.ClientSession
         :return: dict
@@ -42,7 +54,8 @@ class JiraService:
 
     async def _post(self, endpoint, data, session) -> dict:
         """
-        Perform a POST request to Jira API
+        Perform a POST request to Jira API.
+
         :param endpoint: str
         :param data: dict
         :param session: aiohttp.ClientSession
@@ -53,10 +66,14 @@ class JiraService:
         ) as response:
             return await _handle_response(response)
 
-    async def create_ticket(self, jira_ticket: ticket.TicketData) -> dict:
+    async def create_ticket(
+        self, jira_ticket: ticket.TicketData, webhook_url: str
+    ) -> dict:  # maybe not private
         """
-        Private method to create a Jira ticket, called from create_tickets
+        Create a Jira ticket and send a webhook notification to the user with the result.
+
         :param jira_ticket: TicketData
+        :param webhook_url: str - URL to send the notification to
         :return: dict
         """
         endpoint = f"{self.base_url}{self.JIRA_ISSUE_CREATE_ENDPOINT}"
@@ -69,11 +86,27 @@ class JiraService:
             }
         }
         async with aiohttp.ClientSession() as session:
-            return await self._post(endpoint, data, session)
+            try:
+                response = await self._post(endpoint, data, session)
+                ticket_id = response.get("id") if response else None
+                await send_webhook_notification(
+                    webhook_url, success=True, ticket_id=ticket_id
+                )
+                return response
+            # We still want to send a webhook notification if an exception occurs,
+            # so we catch all exceptions here and send the notification
+            # before re-raising the exception.
+            except Exception as e:
+                error_message = str(e)
+                await send_webhook_notification(
+                    webhook_url, success=False, error=error_message
+                )
+                raise e
 
     async def get_issue_types(self) -> dict:
         """
-        Get issue types for a project
+        Get all available issue types of a project in Jira.
+
         :return: dict
         """
         endpoint = f"{self.base_url}{self.JIRA_ISSUE_CREATEMETA_ENDPOINT}"
@@ -95,6 +128,7 @@ class JiraService:
 async def _handle_response(response) -> dict:
     """
     Handle response from Jira API
+
     :param response: dict
     :return: dict
     """
@@ -108,6 +142,7 @@ async def _handle_response(response) -> dict:
 def _handle_jira_error(error_message) -> str:
     """
     Handle Jira error message
+
     :param error_message: str
     :return: str
     """
@@ -117,3 +152,21 @@ def _handle_jira_error(error_message) -> str:
     except json.JSONDecodeError:
         error_detail = error_message
     return error_detail
+
+
+async def send_webhook_notification(
+    webhook_url: str, success: bool, ticket_id: str = None, error: str = None
+) -> None:
+    """
+    Send a webhook notification to user with the result of the ticket creation.
+
+    :param webhook_url: str - URL to send the notification to
+    :param success: bool - whether the ticket was created successfully
+    :param ticket_id: str - ID of the created ticket if available
+    :param error: str - error message if ticket creation failed
+    :return: None
+    """
+    payload = {"success": success, "ticket_id": ticket_id, "error": error}
+
+    async with aiohttp.ClientSession() as session:
+        await session.post(webhook_url, json=payload)
