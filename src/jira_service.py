@@ -75,7 +75,7 @@ class JiraService:
         jira_ticket: ticket_model.TicketData,
         webhook_url: str,
         session: aiohttp.ClientSession,
-    ) -> dict:  # maybe not private
+    ) -> dict:
         """
         Create a Jira ticket and send a webhook notification to the user with the result.
 
@@ -111,7 +111,11 @@ class JiraService:
 
     async def create_tickets(self, tickets: ticket_model, webhook_url: str):
         """
-        Create Jira tickets
+        Create one or multiple Jira tickets. Calls the _create_ticket method for each
+        ticket in the list.
+        Not the most efficient way to create multiple tickets, there is an endpoint
+        for bulk ticket creation in Jira API.
+
         :param webhook_url:
         :param tickets: list of TicketsCreate
         :return: list of responses from Jira API containing ticket data
@@ -148,7 +152,7 @@ async def _handle_response(response) -> dict:
     return {"error": f"Request failed: {error_detail}"}
 
 
-def _handle_jira_error(error_message) -> typing.Optional[str, dict]:
+def _handle_jira_error(error_message) -> typing.Union[str, dict]:
     """
     Handle Jira error message
 
@@ -173,6 +177,7 @@ async def send_webhook_notification(
 ) -> None:
     """
     Send a webhook notification to user with the result of the ticket creation.
+    Usually should be called as a background task.
 
     :param webhook_url: str - URL to send the notification to
     :param success: bool - whether the ticket was created successfully
