@@ -46,8 +46,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public
     This could be improved by implementing leaky bucket or token bucket algorithms.
     """
 
-    def __init__(self, app: Callable, window: int = 60, limit: int = 60):
-        # Default rate limit of 60 requests per minute per IP address.
+    def __init__(self, app: Callable, window: int = 60, limit: int = 10):
+        # Default rate limit of 10 requests per minute per IP address.
         super().__init__(app)
         self.window = window
         self.limit = limit
