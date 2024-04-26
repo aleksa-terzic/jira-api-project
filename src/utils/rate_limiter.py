@@ -1,3 +1,15 @@
+"""
+Rate limiter middleware that applies rate limiting checks to incoming requests.
+
+Implements a simple fixed rate limiter that allows a fixed number of requests
+per window.
+This could be improved by implementing leaky bucket or token bucket algorithms.
+
+RateLimiter: Rate limiter class that uses Redis to store the current amount of requests.
+RateLimitMiddleware: Rate limiting middleware that applies rate limiting checks
+to incoming requests.
+"""
+
 import json
 from typing import Callable
 
@@ -26,7 +38,7 @@ class RateLimiter:
         return request.client.host
 
 
-class RateLimitMiddleware(BaseHTTPMiddleware):
+class RateLimitMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public-methods
     """
     Rate limiting middleware that applies rate limiting checks to incoming requests.
     Implements a simple fixed rate limiter that allows

@@ -20,20 +20,20 @@ jira_config = configuration.JiraConfig()
 
 @router.post(
     "/generate",
-    response_model=ticket.TicketsCreateResponse,
+    response_model=ticket.TicketResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_tickets(
     _request: Request,
-    ticket_data: ticket.TicketData,
+    ticket_data: ticket.TicketsCreate,
     user: dict = Depends(auth.get_user),
 ):
     """
     Creates a ticket in Jira project.
     Can create multiple tickets at once.
     """
-    # tickets = ticket_data.tickets
-    responses = await jira_service.create_ticket(ticket_data, user["webhook_url"])
+    tickets = ticket_data.tickets
+    responses = await jira_service.create_tickets(tickets, user["webhook_url"])
     return responses
 
 

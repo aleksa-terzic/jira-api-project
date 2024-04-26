@@ -6,14 +6,14 @@ import pydantic
 
 
 class ContentItem(pydantic.BaseModel):
-    """Part of a paragraph."""
+    """Part of a paragraph in ticket description."""
 
     type: str
     text: str
 
 
 class Paragraph(pydantic.BaseModel):
-    """A paragraph in description."""
+    """A paragraph in ticket description."""
 
     type: str
     content: typing.List[ContentItem]
@@ -59,20 +59,28 @@ class TicketData(pydantic.BaseModel):
         return Description(**description_json).dict()
 
 
-class TicketsCreateResponse(pydantic.BaseModel):
+class TicketsCreate(pydantic.BaseModel):
+    """Request payload for creating one or multiple tickets."""
+
+    tickets: typing.List[TicketData]
+
+
+class TicketResponseItem(pydantic.BaseModel):
     """Response for ticket creation."""
 
     id: str
     key: str
-    self: str
+    self: pydantic.HttpUrl
 
 
-# class TicketsCreate(BaseModel):
-#     tickets: List[TicketData]
+class TicketResponse(pydantic.BaseModel):
+    """Response for multiple ticket creation."""
+
+    tickets: typing.List[TicketResponseItem]
 
 
 class Project(pydantic.BaseModel):
-    """Jira project."""
+    """Jira project details."""
 
     id: str
     key: str

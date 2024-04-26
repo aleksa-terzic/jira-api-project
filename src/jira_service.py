@@ -11,12 +11,13 @@ Example usage:
     issue_types = await jira_service.get_issue_types()
 """
 
+import asyncio
 import json
 
 import aiohttp
 from fastapi import status
 
-from src.schemas import ticket
+from src.schemas import ticket as ticket_data
 from src.utils import configuration
 
 # Initialize configuration
@@ -66,8 +67,11 @@ class JiraService:
         ) as response:
             return await _handle_response(response)
 
-    async def create_ticket(
-        self, jira_ticket: ticket.TicketData, webhook_url: str
+    async def _create_ticket(
+        self,
+        jira_ticket: ticket_data.TicketData,
+        webhook_url: str,
+        session: aiohttp.ClientSession,
     ) -> dict:  # maybe not private
         """
         Create a Jira ticket and send a webhook notification to the user with the result.
@@ -85,44 +89,46 @@ class JiraService:
                 "issuetype": {"id": jira_ticket.issue_type},
             }
         }
+        try:
+            response = await self._post(endpoint, data, session)
+            ticket_id = response.get("id") if response else None
+            await send_webhook_notification(
+                webhook_url, success=True, ticket_id=ticket_id
+            )
+            return response
+        # We still want to send a webhook notification if an exception occurs,
+        # so we catch all exceptions here and send the notification
+        # before re-raising the exception.
+        except Exception as e:
+            error_message = str(e)
+            await send_webhook_notification(
+                webhook_url, success=False, error=error_message
+            )
+            raise e
+
+    async def create_tickets(self, tickets: ticket_data, webhook_url: str):
+        """
+        Create Jira tickets
+        :param webhook_url:
+        :param tickets: list of TicketsCreate
+        :return: list of responses from Jira API containing ticket data
+        """
         async with aiohttp.ClientSession() as session:
-            try:
-                response = await self._post(endpoint, data, session)
-                ticket_id = response.get("id") if response else None
-                await send_webhook_notification(
-                    webhook_url, success=True, ticket_id=ticket_id
-                )
-                return response
-            # We still want to send a webhook notification if an exception occurs,
-            # so we catch all exceptions here and send the notification
-            # before re-raising the exception.
-            except Exception as e:
-                error_message = str(e)
-                await send_webhook_notification(
-                    webhook_url, success=False, error=error_message
-                )
-                raise e
+            tasks = [
+                self._create_ticket(ticket, webhook_url, session) for ticket in tickets
+            ]
+            responses = await asyncio.gather(*tasks)
+            return {"tickets": responses}
 
     async def get_issue_types(self) -> dict:
         """
         Get all available issue types of a project in Jira.
 
-        :return: dict
+        :return: dict containing issue types information
         """
         endpoint = f"{self.base_url}{self.JIRA_ISSUE_CREATEMETA_ENDPOINT}"
         async with aiohttp.ClientSession() as session:
             return await self._get(endpoint, session)
-
-    # async def create_tickets(self, tickets):
-    #     """
-    #     Create Jira tickets
-    #     :param tickets: list of TicketsCreate
-    #     :return: list of responses
-    #     """
-    #     async with aiohttp.ClientSession() as session:
-    #         tasks = [self._create_ticket(ticket, session) for ticket in tickets]
-    #         responses = await asyncio.gather(*tasks)
-    #         return responses
 
 
 async def _handle_response(response) -> dict:
