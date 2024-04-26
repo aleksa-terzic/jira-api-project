@@ -26,6 +26,7 @@ class JiraConfig(pydantic_settings.BaseSettings):
 def get_api_headers():
     """
     Get the API headers for the Jira API.
+    TODO: Make this dynamic to allow for different content types.
     :return: dict
     """
     return {
