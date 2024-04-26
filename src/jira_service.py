@@ -13,11 +13,14 @@ Example usage:
 
 import asyncio
 import json
+import typing
 
 import aiohttp
 from fastapi import status
+from pydantic import ValidationError
 
-from src.schemas import ticket as ticket_data
+from src.schemas import ticket as ticket_model
+from src.schemas import errors as error_model
 from src.utils import configuration
 
 # Initialize configuration
@@ -69,7 +72,7 @@ class JiraService:
 
     async def _create_ticket(
         self,
-        jira_ticket: ticket_data.TicketData,
+        jira_ticket: ticket_model.TicketData,
         webhook_url: str,
         session: aiohttp.ClientSession,
     ) -> dict:  # maybe not private
@@ -99,14 +102,14 @@ class JiraService:
         # We still want to send a webhook notification if an exception occurs,
         # so we catch all exceptions here and send the notification
         # before re-raising the exception.
-        except Exception as e:
-            error_message = str(e)
+        except Exception as ex:
+            error_message = str(ex)
             await send_webhook_notification(
                 webhook_url, success=False, error=error_message
             )
-            raise e
+            raise ex
 
-    async def create_tickets(self, tickets: ticket_data, webhook_url: str):
+    async def create_tickets(self, tickets: ticket_model, webhook_url: str):
         """
         Create Jira tickets
         :param webhook_url:
@@ -145,7 +148,7 @@ async def _handle_response(response) -> dict:
     return {"error": f"Request failed: {error_detail}"}
 
 
-def _handle_jira_error(error_message) -> str:
+def _handle_jira_error(error_message) -> typing.Optional[str, dict]:
     """
     Handle Jira error message
 
@@ -154,8 +157,13 @@ def _handle_jira_error(error_message) -> str:
     """
     try:
         error_data = json.loads(error_message)
-        error_detail = error_data.get("errors", error_message)
-    except json.JSONDecodeError:
+        jira_error = error_model.JiraError.parse_obj(
+            error_data
+        )  # Parse JSON into JiraError object
+        error_detail = (
+            f"Status: {jira_error.status}, Messages: {', '.join(jira_error.errors)}"
+        )
+    except (json.JSONDecodeError, ValidationError):
         error_detail = error_message
     return error_detail
 
