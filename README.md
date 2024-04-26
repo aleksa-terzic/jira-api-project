@@ -43,6 +43,8 @@ How to manage API tokens for your Atlassian account [here](https://support.atlas
     docker-compose up --build
     ```
    
+4. Make sure to grab one of the API keys from `src/authentication/db.py` and use it as the `x-api-key` header in your requests.
+   
 You can now access the API at http://localhost:8000/docs.
    
 
