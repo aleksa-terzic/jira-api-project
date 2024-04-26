@@ -40,6 +40,8 @@ class RateLimiter:
 
 class RateLimitMiddleware(BaseHTTPMiddleware):  # pylint: disable=too-few-public-methods
     """
+    TODO: Refactor to connect to Redis on startup of application. This way it introduces
+     overhead on each request due to connection establishment process.
     Rate limiting middleware that applies rate limiting checks to incoming requests.
     Implements a simple fixed rate limiter that allows
     a fixed number of requests per window.
