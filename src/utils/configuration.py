@@ -19,6 +19,7 @@ class JiraConfig(pydantic_settings.BaseSettings):
     JIRA_API_TOKEN: str
     JIRA_PROJECT_ID: str
 
+    # Load env variables from .env
     model_config = pydantic_settings.SettingsConfigDict(env_file=".env")
 
 

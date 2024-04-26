@@ -84,6 +84,7 @@ class JiraService:
         :return: dict
         """
         endpoint = f"{self.base_url}{self.JIRA_ISSUE_CREATE_ENDPOINT}"
+        # Construct the data payload for the ticket creation
         data = {
             "fields": {
                 "project": {"id": self.project_id},
@@ -94,6 +95,8 @@ class JiraService:
         }
         try:
             response = await self._post(endpoint, data, session)
+
+            # Extract ticket ID from the response and send a webhook notification
             ticket_id = response.get("id") if response else None
             await send_webhook_notification(
                 webhook_url, success=True, ticket_id=ticket_id
@@ -104,6 +107,8 @@ class JiraService:
         # before re-raising the exception.
         except Exception as ex:
             error_message = str(ex)
+
+            # Send a webhook notification with the error message
             await send_webhook_notification(
                 webhook_url, success=False, error=error_message
             )
@@ -154,7 +159,7 @@ async def _handle_response(response) -> dict:
 
 def _handle_jira_error(error_message) -> typing.Union[str, dict]:
     """
-    Handle Jira error message
+    Handle Jira error message. TODO: Needs more detailing.
 
     :param error_message: str
     :return: str
